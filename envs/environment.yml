@@ -7,18 +7,18 @@ dependencies:
   - python==3.10.15
 
   # Common dependencies (using oldest versions with >=, update as necessary)
-  - samtools>=1.11
-  - htslib>=1.11
-  - deeptools
-  - bedtools
-  - bcftools
+  - samtools==1.21
+  - deeptools==3.5.2
+  - bedtools==2.31.1
+  - bcftools==1.19
   - pigz
 
-  # Assembl
-  - hifiasm=0.19.5
-  - gfatools
-  - ragtag
-  - quast
+  # Assembly
+  - hifiasm==0.19.5
+  - purge_dups==1.2.6
+  - gfatools==0.5
+  - ragtag==2.1.0
+  - quast==5.2.0
 
   # Alignment
   - minimap2==2.26
@@ -30,4 +30,6 @@ dependencies:
   - blast
 
   # SV calling
-  - sniffles==2.5.2
+  - pip==25.0.1
+  - pip:
+    - git+https://github.com/stacy-l/sniffles.git
