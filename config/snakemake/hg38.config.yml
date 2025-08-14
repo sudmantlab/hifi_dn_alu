@@ -1,0 +1,88 @@
+#############################
+### Project configuration ###
+#############################
+
+# Indicate present working directory and metadata (sample) table
+# data is expected in the data/ folder relative to the working directory
+# need to write an "expected inputs/structure" doc for data/
+
+workdir: "present_directory/"
+sample_table: "/your/sample/table.tsv"
+
+##########################
+### Path configuration ###
+##########################
+
+# Specify paths to scripts, packages, and other tools not managed by conda
+# Working on helper functions for managing environmental $PATH as necessary.
+
+paths:
+  HiFiAdapterFilt: 
+    repo: "/path/to/HiFiAdapterFilt"
+    db: "/path/to/HiFiAdapterFilt/DB"
+  kmc:
+    path: "/path/tokmc/bin/kmc"
+
+singularity:
+  vg:
+    container: "docker://quay.io/vgteam/vg:v1.63.1"
+    bind_paths: ["present_directory/"]
+    args: "--writable-tmpfs --containall"
+  minigraph-cactus:
+    container: "code/cactus/cactus_v2.8.1.sif"
+    bind_paths: ["present_directory/"]
+    args: "--writable-tmpfs --containall"
+
+###############################
+### Analysis config options ###
+###############################
+
+# Indicate reference genome + annotation files (.bed, .gff, etc)
+# The alias will be used for organizing mapping outputs:
+# for example, output/alignment/CHM13 or output/alignment/hg38_no_alts
+
+# Reference genome and annotations are expected in the default empty ./references directory.
+
+reference:
+  fasta: "present_directory/references/hg38_HGSVC/hg38.no_alt.fa.gz" # HGSVC hg38 no alts
+  alias: "hg38"
+  annotations: # not all are required
+    repeats: "present_directory/references/hg38_HGSVC/GRCh38_simpleRepeat.bed"
+    segdups: "present_directory/references/hg38_HGSVC/GRCh38_genomicSuperDups.bed"
+    censat: "present_directory/references/hg38_HGSVC/GRCh38_centromeres.bed"
+    cpg: "present_directory/references/hg38_HGSVC/GRCh38_cpgIslandExt.bed"
+    plof: "present_directory/references/hg38_HGSVC/GRCh38_gnomAD_geneLoF.bed"
+    microsat: "present_directory/references/hg38_HGSVC/GRCh38_microsat.bed"
+    repeatmasker: "present_directory/references/hg38_HGSVC/GRCh38_repeatmasker.bed"
+    refseq: "present_directory/references/hg38_HGSVC/hg38.ncbiRefSeq.gtf.gz"
+    gencode: "present_directory/references/hg38_HGSVC/gencode.v44.basic.annotation.gff3.gz"
+graph:
+  hg38:
+    full: 
+      gbz: "present_directory/references/HPRC/hprc-v1.1-mc-grch38.gbz"
+      prefix: "hprc-v1.1-mc-grch38"
+  CHM13:
+    full:
+      gbz: "present_directory/references/HPRC/hprc-v1.1-mc-chm13.gbz"
+      prefix: "hprc-v1.1-mc-chm13"
+
+
+duplomap:
+  db: "config/packages/duplomap/hg38"
+
+minimap2:
+  readgroup: "@RG\\tID:{specimen}\\tSM:{specimen}\\tPL:PACBIO"
+
+samtools:
+  minQ: 10
+
+sniffles:
+  minsupport: 0
+  mapq: 20
+  mosaic-af-min: 0
+  mosaic-af-max: 0.2
+  mosaic-qc-strand: False
+
+repeatmasker:
+  species: "human"
+  engine: "rmblast"
