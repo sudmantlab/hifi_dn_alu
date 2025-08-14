@@ -1,4 +1,5 @@
-# *De novo* mobile element identification (WIP)
+# Direct identification of de novo mobile element insertions from single molecule sequencing of human sperm
+WIP: Paths might be wonky while testing that the structure generalizes in new setups. Watch your step :)
 
 # Getting started
 
