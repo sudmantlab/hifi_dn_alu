@@ -11,7 +11,7 @@ rule hprc_vg_index:
         "references/HPRC/{prefix}.longread.zipcodes", 
         "references/HPRC/{prefix}.longread.withzip.min"
     log:
-        "spermSV/logs/references/HPRC/{prefix}.index.log"
+        "../logs/references/HPRC/{prefix}.index.log"
     params:
         home = config["workdir"],
         container = config["singularity"]["vg"]["container"],

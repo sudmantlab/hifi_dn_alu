@@ -22,7 +22,7 @@ git clone https://github.com/sudmantlab/hifi_dn_alu.git
 cd hifi_dn_alu
 ```
 
-You can configure the pipeline using the config file at `config/snakemake/hg38.config.yml` and a `.tsv` file describing your samples (see `config/snakemake/example_samples.tsv` for the expected format).
+Most of the pipeline is configured using the config file at `config/snakemake/hg38.config.yml` and a `samples.tsv` file describing your samples (see `config/snakemake/example_samples.tsv` for the expected format).
 
 The pipeline expects the following directories to be present in the working directory:
 * `data`: A directory containing uBAM (unaligned BAM) or `fastq.gz` files in a nested subdirectory structure (ex: `data/PacBio-HiFi/{specimen}/{lane}/{smrtcell}.fastq.gz`). This structure is necessary to provide multiple input files per specimen (see `config/snakemake/example_samples.tsv`).
@@ -38,12 +38,16 @@ This pipeline is designed to require minimal dependency management, but you can 
 
 ## Running the pipeline
 
+This pipeline was built and tested on the [Savio cluster at UC Berkeley](https://docs-research-it.berkeley.edu/services/high-performance-computing/user-guide/hardware-config/) using savio4_htc (56 cores @ Intel Xeon Gold 6330 @ 2.0 GHz & 512 GB RAM). You may need to update thread/memory allocation according to your resources.
+
+```
+
 You can test your setup using the dry run (`-np`) setting.
 ```bash
 snakemake --use-conda --cores {cores} -np
 ```
 
-If working on a SLURM cluster, you can use `snakemake` to submit batch jobs to a specified partition (see `config/snakemake/example_slurm.yml` and [the docs](https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html)).
+Recommended: If working on a SLURM cluster, you can use `snakemake` to submit batch jobs to a specified partition (see `config/snakemake/example_slurm.yml` and [the docs](https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html)). This allows `snakemake` to automatically re-queue and update memory allocation for jobs that fail with OOM errors. This is particularly useful if calibrating memory allocation or troubleshooting OOM errors on processes where memory allocation is determined by input size (typically assembly and alignment).
 
 ```
 snakemake --use-conda --profile config/snakemake/example_slurm.yml -np
