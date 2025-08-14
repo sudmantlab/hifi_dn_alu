@@ -6,12 +6,12 @@ localrules: hprc_merge_gams
 rule hprc_vg_index:
     input:
         # download from HPRC
-        gbz = "present_directory/references/HPRC/{prefix}.gbz"
+        gbz = "references/HPRC/{prefix}.gbz"
     output:
-        "present_directory/references/HPRC/{prefix}.longread.zipcodes", 
-        "present_directory/references/HPRC/{prefix}.longread.withzip.min"
+        "references/HPRC/{prefix}.longread.zipcodes", 
+        "references/HPRC/{prefix}.longread.withzip.min"
     log:
-        "present_directory/spermSV/logs/references/HPRC/{prefix}.index.log"
+        "spermSV/logs/references/HPRC/{prefix}.index.log"
     params:
         home = config["workdir"],
         container = config["singularity"]["vg"]["container"],
@@ -31,9 +31,9 @@ rule hprc_vg_index:
 
 rule hprc_vg_giraffe_align:
     input:
-        fastq = "output/preprocessing/uBAMtoFastq/{specimen}/{lane}/{smrtcell}.ccs.fastq.gz",
-        gbz = "present_directory/references/HPRC/{prefix}.gbz",
-        indices = ["present_directory/references/HPRC/{prefix}.longread.zipcodes", "present_directory/references/HPRC/{prefix}.longread.withzip.min"]
+        fastq = "data/PacBio-HiFi/{specimen}/{lane}/{smrtcell}.fastq.gz",
+        gbz = "references/HPRC/{prefix}.gbz",
+        indices = ["references/HPRC/{prefix}.longread.zipcodes", "references/HPRC/{prefix}.longread.withzip.min"]
     output:
         gam = temp("output/alignment/{prefix}/giraffe/mapped/temp/{specimen}/{lane}/{specimen}_{smrtcell}.mapped.gam"),
         report = "logs/alignment/{prefix}/giraffe/mapped/temp/{specimen}/{lane}/{specimen}_{smrtcell}.mapped.report.tsv"
@@ -105,7 +105,7 @@ rule hprc_vg_stats:
 rule hprc_vg_surject:
     input:
         gam = "output/alignment/{prefix}/giraffe/mapped/{specimen}.mapped.gam",
-        gbz = "present_directory/references/HPRC/{prefix}.gbz"
+        gbz = "references/HPRC/{prefix}.gbz"
     output:
         bam = "output/alignment/{prefix}/giraffe/mapped/{specimen}.surjected.bam"
     log:

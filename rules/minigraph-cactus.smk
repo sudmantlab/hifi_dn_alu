@@ -1,10 +1,12 @@
+# Note: This is not used in the current pipeline build, but might be updated in the future (or removed at release).
+
 localrules: convert_hg38_repeat_bed_hprc, convert_CHM13_repeat_bed_hprc
 
 rule hprc_personalized_gbwt:
     input:
-        gbz = "present_directory/references/HPRC/{prefix}.gbz"
+        gbz = "references/HPRC/{prefix}.gbz"
     output:
-        ri = "present_directory/references/HPRC/{prefix}.ri",
+        ri = "references/HPRC/{prefix}.ri",
     wildcard_constraints:
         specimen = "[A-Za-z0-9]+",
         prefix = "[A-Za-z0-9\-\.]+",
@@ -27,10 +29,10 @@ rule hprc_personalized_gbwt:
 
 rule hprc_personalized_haplotype_sampling:
     input:
-        gbz = "present_directory/references/HPRC/{prefix}.gbz",
-        ri = "present_directory/references/HPRC/{prefix}.ri",
+        gbz = "references/HPRC/{prefix}.gbz",
+        ri = "references/HPRC/{prefix}.ri",
     output:
-        haplotypes = "present_directory/references/HPRC/{prefix}.hapl"
+        haplotypes = "references/HPRC/{prefix}.hapl"
     wildcard_constraints:
         specimen = "[A-Za-z0-9]+",
         prefix = "[A-Za-z0-9\-\.]+",
@@ -57,7 +59,7 @@ def get_fastas_per_sample(wildcards, sample_table = config['sample_table']) -> L
     A helper function for creating a list of fastq.gz paths for each sample ahead of personalized pangenome construction.
     TODO: The base path should maybe be set in the configfile.
     """
-    basepath = "output/preprocessing/uBAMtoFastq/{specimen}/{lane}/{smrtcell}.ccs.fasta.gz"
+    basepath = "data/PacBio-HiFi/{specimen}/{lane}/{smrtcell}.ccs.fasta.gz"
     table = pd.read_table(sample_table, index_col=False, dtype=str)
     samples = table[table["specimen"] == str(wildcards.specimen)]
     samples = samples.to_records(index=False)
@@ -69,9 +71,9 @@ def get_fastas_per_sample(wildcards, sample_table = config['sample_table']) -> L
 
 rule convert_fastq_to_fasta:
     input:
-        fastq = "output/preprocessing/uBAMtoFastq/{specimen}/{lane}/{smrtcell}.ccs.fastq.gz"
+        fastq = "data/PacBio-HiFi/{specimen}/{lane}/{smrtcell}.fastq.gz"
     output:
-        fasta = temp("output/preprocessing/uBAMtoFastq/{specimen}/{lane}/{smrtcell}.ccs.fasta.gz")
+        fasta = temp("data/PacBio-HiFi/{specimen}/{lane}/{smrtcell}.ccs.fasta.gz")
     threads: 16
     shell:
         """
@@ -105,8 +107,8 @@ rule hprc_personalized_kmer_counting:
 
 rule hprc_personalized_graph_construction:
     input:
-        gbz = "present_directory/references/HPRC/{prefix}.gbz",
-        haplotypes = "present_directory/references/HPRC/{prefix}.hapl",
+        gbz = "references/HPRC/{prefix}.gbz",
+        haplotypes = "references/HPRC/{prefix}.hapl",
         kmer = "output/alignment/hprc_personalized/kmers/{specimen}.kff"
     output:
         gbz = "output/alignment/hprc_personalized/graphs/{prefix}/{specimen}.gbz"
@@ -168,7 +170,7 @@ rule hprc_personalized_graph_index:
 rule hprc_personalized_haplotype_mapping:
     input:
         gbz = "output/alignment/hprc_personalized/graphs/{prefix}/{specimen}.gbz",
-        fastq = "output/preprocessing/uBAMtoFastq/{specimen}/{lane}/{smrtcell}.ccs.fastq.gz",
+        fastq = "data/PacBio-HiFi/{specimen}/{lane}/{smrtcell}.fastq.gz",
         indices = ["output/alignment/hprc_personalized/graphs/{prefix}/{specimen}.dist",
         "output/alignment/hprc_personalized/graphs/{prefix}/{specimen}.longread.zipcodes", 
         "output/alignment/hprc_personalized/graphs/{prefix}/{specimen}.longread.withzip.min"]
@@ -266,7 +268,7 @@ rule hprc_surjected_bam_sort:
         prefix = "[A-Za-z0-9\-\.]+",
     threads: 8
     conda:
-        "../envs/mapping.yml"
+        "../envs/environment.yml"
     shell:
         """
         samtools sort -@ {threads} {input.bam} -o {output.bam}
@@ -301,9 +303,9 @@ rule hprc_surject_ref_fasta:
 rule convert_hg38_repeat_bed_hprc:
     # Quick conversion of GRCh38 chr names (chr{n}) to graph-compatible names (GRCh38#0#chr{n})
     input:
-        "present_directory/references/hg38_HGSVC/GRCh38_simpleRepeat.bed"
+        "references/hg38_HGSVC/GRCh38_simpleRepeat.bed"
     output:
-        "present_directory/references/HPRC/GRCh38_simpleRepeat.bed"
+        "references/HPRC/GRCh38_simpleRepeat.bed"
     shell:
         """
         sed 's/chr/GRCh38#0#chr/' {input} > {output}
@@ -312,9 +314,9 @@ rule convert_hg38_repeat_bed_hprc:
 rule convert_CHM13_repeat_bed_hprc:
     # Quick conversion of CHM13 chr names (chr{n}) to graph-compatible names (CHM13#0#chr{n})
     input:
-        "present_directory/references/T2T_CHM13/chm13v2.0_simpleRepeat.bed"
+        "references/T2T_CHM13/chm13v2.0_simpleRepeat.bed"
     output:
-        "present_directory/references/HPRC/CHM13_simpleRepeat.bed"
+        "references/HPRC/CHM13_simpleRepeat.bed"
     shell:
         """
         sed 's/chr/CHM13#0#chr/' {input} > {output}
@@ -325,7 +327,7 @@ rule hprc_sniffles_mosaic_hg38:
         bam = "output/alignment/hprc_personalized/mapped/{prefix}/{specimen}.surjected.bam",
         index = "output/alignment/hprc_personalized/mapped/{prefix}/{specimen}.surjected.bam.bai",
         fasta = "output/alignment/hprc_personalized/graphs/{prefix}/{specimen}.GRCh38.fasta",
-        repeats = "present_directory/references/HPRC/GRCh38_simpleRepeat.bed"
+        repeats = "references/HPRC/GRCh38_simpleRepeat.bed"
     output:
         vcf = "output/alignment/hprc_personalized/variants/{prefix}/sniffles_mosaic/hg38/{specimen}.vcf.gz"
     log:
@@ -335,7 +337,9 @@ rule hprc_sniffles_mosaic_hg38:
         prefix = "[A-Za-z0-9\-\.]+",
     threads: 10
     conda:
-        "../envs/sniffles-dev.yml"
+        "../envs/environment.yml"
+    config:
+        repeats = 
     shell:
         """
         sniffles --input {input.bam} \
@@ -358,7 +362,7 @@ use rule hprc_sniffles_mosaic_hg38 as hprc_sniffles_mosaic_CHM13 with:
         bam = "output/alignment/hprc_personalized/mapped/{prefix}/{specimen}.surjected.bam",
         index = "output/alignment/hprc_personalized/mapped/{prefix}/{specimen}.surjected.bam.bai",
         fasta = "output/alignment/hprc_personalized/graphs/{prefix}/{specimen}.CHM13.fasta",
-        repeats = "present_directory/references/HPRC/CHM13_simpleRepeat.bed"
+        repeats = "references/HPRC/CHM13_simpleRepeat.bed"
     output:
         vcf = "output/alignment/hprc_personalized/variants/{prefix}/sniffles_mosaic/CHM13/{specimen}.vcf.gz"
     log:
@@ -369,7 +373,7 @@ rule hprc_sniffles_mosaic_hg38_qc_all:
         bam = "output/alignment/hprc_personalized/mapped/{prefix}/{specimen}.surjected.bam",
         index = "output/alignment/hprc_personalized/mapped/{prefix}/{specimen}.surjected.bam.bai",
         fasta = "output/alignment/hprc_personalized/graphs/{prefix}/{specimen}.GRCh38.fasta",
-        repeats = "present_directory/references/HPRC/GRCh38_simpleRepeat.bed"
+        repeats = "references/HPRC/GRCh38_simpleRepeat.bed"
     output:
         vcf = "output/alignment/hprc_personalized/variants/{prefix}/sniffles_mosaic/hg38/{specimen}.qc_all.vcf.gz"
     log:
@@ -379,7 +383,7 @@ rule hprc_sniffles_mosaic_hg38_qc_all:
         prefix = "[A-Za-z0-9\-\.]+",
     threads: 10
     conda:
-        "../envs/sniffles-dev.yml"
+        "../envs/environment.yml"
     shell:
         """
         sniffles --input {input.bam} \
@@ -402,7 +406,7 @@ use rule hprc_sniffles_mosaic_hg38_qc_all as hprc_sniffles_mosaic_CHM13_qc_all w
         bam = "output/alignment/hprc_personalized/mapped/{prefix}/{specimen}.surjected.bam",
         index = "output/alignment/hprc_personalized/mapped/{prefix}/{specimen}.surjected.bam.bai",
         fasta = "output/alignment/hprc_personalized/graphs/{prefix}/{specimen}.CHM13.fasta",
-        repeats = "present_directory/references/HPRC/CHM13_simpleRepeat.bed"
+        repeats = "references/HPRC/CHM13_simpleRepeat.bed"
     output:
         vcf = "output/alignment/hprc_personalized/variants/{prefix}/sniffles_mosaic/CHM13/{specimen}.qc_all.vcf.gz"
     log:

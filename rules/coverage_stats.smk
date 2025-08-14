@@ -5,7 +5,8 @@ rule hg38_standard_coverage_all:
     output:
         plot = "output/alignment/hg38/minimap2/standard/coverage_stats/all.coverage.html",
         rawcounts = "output/alignment/hg38/minimap2/standard/coverage_stats/all.rawcounts.coverage.tab"
-    conda: "../envs/deeptools.yml"
+    conda: 
+        "../envs/environment.yml"
     threads: 5
     params: 
         format = "plotly",
@@ -25,19 +26,6 @@ rule hg38_standard_coverage_all:
         --minMappingQuality 10 \
         --labels {params.labels}
         """
-
-use rule hg38_standard_coverage_all as hg38_duplomap_coverage_all with:
-    input:
-        bams = expand('output/alignment/hg38/minimap2/duplomap/mapped/{specimen}/realigned.bam', specimen=specimens),
-        indices = expand('output/alignment/hg38/minimap2/duplomap/mapped/{specimen}/realigned.bam.bai', specimen=specimens)
-    output:
-        plot = "output/alignment/hg38/minimap2/duplomap/coverage_stats/all.coverage.html",
-        rawcounts = "output/alignment/hg38/minimap2/duplomap/coverage_stats/all.rawcounts.coverage.tab"
-    params: 
-        format = "plotly",
-        sample_bp = 1000000,
-        title = "'Coverage with duplomap on hg38'",
-        labels = specimens
 
 use rule hg38_standard_coverage_all as scaffolded_standard_coverage_specimen with:
     input:
@@ -60,7 +48,7 @@ rule hg38_standard_coverage_chr:
         plot = 'output/alignment/hg38/minimap2/standard/coverage_stats/{specimen}/{chr}.coverage.html',
         rawcounts = 'output/alignment/hg38/minimap2/standard/coverage_stats/{specimen}/{chr}.rawcounts.tsv'
     conda:
-        "../envs/deeptools.yml"
+        "../envs/environment.yml"
     threads: 2
     params:
         format = "plotly",
@@ -81,19 +69,6 @@ rule hg38_standard_coverage_chr:
         --minMappingQuality 10 
         """
 
-use rule hg38_standard_coverage_chr as hg38_duplomap_coverage_chr with:
-    input:
-        bams = 'output/alignment/hg38/minimap2/duplomap/mapped/{specimen}/realigned.bam',
-        indices = 'output/alignment/hg38/minimap2/duplomap/mapped/{specimen}/realigned.bam.bai',
-    output:
-        plot = 'output/alignment/hg38/minimap2/duplomap/coverage_stats/{specimen}/{chr}.coverage.pdf',
-        rawcounts = 'output/alignment/hg38/minimap2/duplomap/coverage_stats/{specimen}/{chr}.rawcounts.tsv'
-    params:
-        format = "plotly",
-        sample_bp = 1000000,
-        title = "'Coverage with duplomap on {chr} - {specimen}'",
-        region_format = "{chr}"
-
 use rule hg38_standard_coverage_chr as scaffolded_standard_coverage_chr with:
     input:
         bam = 'output/alignment/{ref}_scaffolded/minimap2/standard/mapped/{specimen}.sorted.merged.bam',
@@ -104,5 +79,5 @@ use rule hg38_standard_coverage_chr as scaffolded_standard_coverage_chr with:
     params:
         format = "plotly",
         sample_bp = 1000000,
-        title = "'Coverage with duplomap on {chr} - {specimen}, {hap}'",
+        title = "'Coverage on {chr} - {specimen}, {hap}'",
         region_format = "{chr}_RagTag_{hap}"

@@ -1,0 +1,17 @@
+executor: slurm
+jobs: 10
+printshellcmds: True
+default-resources: 
+  slurm_account: 'your_slurm_account'
+  slurm_partition: 'target_slurm_partition'
+  qos: 'partition_qos'
+  mem_mb: f"{attempt * 24000}"
+  runtime: 2400
+set-resources:
+  hifiasm:
+    mem_mb: f"{attempt * 128000}"
+    runtime: 16800
+  minimap2:
+    mem_mb: f"{attempt * 48000}"
+  minimap2_to_hg38_scaffolded:
+    mem_mb: f"{attempt * 48000}"

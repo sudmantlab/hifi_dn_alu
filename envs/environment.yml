@@ -1,0 +1,33 @@
+name: dnsv_analysis
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python==3.10.15
+
+  # Common dependencies (using oldest versions with >=, update as necessary)
+  - samtools>=1.11
+  - htslib>=1.11
+  - deeptools
+  - bedtools
+  - bcftools
+  - pigz
+
+  # Assembl
+  - hifiasm=0.19.5
+  - gfatools
+  - ragtag
+  - quast
+
+  # Alignment
+  - minimap2==2.26
+
+  # Repeat analysis
+  - trf==4.09.1
+  - repeatmasker==4.1.2.p1
+  - rmblast
+  - blast
+
+  # SV calling
+  - sniffles==2.5.2

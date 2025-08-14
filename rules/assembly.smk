@@ -27,7 +27,7 @@ rule hifiasm:
     log: 
         "logs/assembly/hifiasm/{specimen}/{specimen}.asm.log"
     conda: 
-        "../envs/HiFiAssembly.yml"
+        "../envs/environment.yml"
     shell: 
         """
         hifiasm -o {params.prefix} -t {threads} {input} > {log} 2>&1
@@ -40,7 +40,8 @@ rule gfaToFa:
         specimen = "[A-Za-z0-9]+"
     log: "logs/assembly/hifiasm/{specimen}/{specimen}.{hap}.fa.log"
     threads: 1
-    conda: "../envs/HiFiAssembly.yml"
+    conda: 
+        "../envs/environment.yml"
     shell: 
         "gfatools gfa2fa {input} > {output} 2> {log}"
 
@@ -52,7 +53,7 @@ rule ragtag_scaffold:
     wildcard_constraints:
         specimen = "[A-Za-z0-9]+"
     conda:
-        "../envs/assembly_qc.yml"
+        "../envs/environment.yml"
     threads: 10
     params:
         refgenome = config['reference']['fasta_uncompressed'],
@@ -99,7 +100,7 @@ rule cat_scaffolds:
         specimen = "[A-Za-z0-9]+"
     threads: 1
     conda:
-        "../envs/mapping.yml"
+        "../envs/environment.yml"
     shell:
         """
         cat {input} > {output.fa}
@@ -118,7 +119,7 @@ rule quast_raw:
     wildcard_constraints:
         specimen = "[A-Za-z0-9]+"
     conda:
-        "../envs/assembly_qc.yml"
+        "../envs/environment.yml"
     threads: 6
     params:
         outdir = "output/assembly/hifiasm/{specimen}/quast/raw"
@@ -138,45 +139,10 @@ use rule quast_raw as quast_scaffolded with:
     wildcard_constraints:
         specimen = "[A-Za-z0-9]+"
     conda:
-        "../envs/assembly_qc.yml"
+        "../envs/environment.yml"
     threads: 6
     params:
         outdir = "output/assembly/hifiasm/{specimen}/quast/{ref}_scaffolded"
-
-rule combine_all_stats:
-    input:
-        expand("output/assembly/assembly_stats/{specimen}.{hap}.tsv", specimen = [x for x in specimens if x != '901'], hap = ['hap1', 'hap2'])
-        # expand("output/assembly/assembly_stats/{specimen}.{hap}.tsv", specimen = glob_wildcards("output/assembly/assembly_stats/{specimen}.hap1.tsv").specimen, hap = ['hap1', 'hap2'])
-    output:
-        'output/assembly/assembly_stats/all.tsv'
-    run:
-        import pandas as pd
-        import glob
-        import os
-
-        # Get all matching tsv files at runtime
-        input_pattern = "output/assembly/assembly_stats/*.*.tsv"
-        all_files = glob.glob(input_pattern)
-        
-        if not all_files:
-            raise ValueError(f"No files found matching the pattern: {input_pattern}")
-
-        # Read and concatenate all files
-        df_list = []
-        for file in all_files:
-            try:
-                df = pd.read_csv(file, sep='\t')
-                df_list.append(df)
-            except pd.errors.EmptyDataError:
-                print(f"Warning: {file} is empty and will be skipped.")
-        
-        if not df_list:
-            raise ValueError("No valid data found in any of the input files.")
-        
-        combined_df = pd.concat(df_list, ignore_index=True)
-        
-        # Write the combined dataframe to the output file
-        combined_df.to_csv(output[0], sep='\t', index=False)
 
 ### QC: Flagger (assembly error estimation) ###
 
@@ -285,7 +251,7 @@ rule filter_canonical_chromosomes:
         specimen = "[A-Za-z0-9]+"
     threads: 1
     conda:
-        "../envs/mapping.yml"
+        "../envs/environment.yml"
     shell:
         """
         samtools faidx {input}
@@ -297,13 +263,13 @@ rule filter_canonical_chromosomes:
 
 rule filter_hg38_canonical_chromosomes:
     input:
-        "/global/scratch/users/stacy-l/references/hg38_HGSVC/hg38.no_alt.fa"
+        config['reference']['fasta']
     output:
-        fasta = "/global/scratch/users/stacy-l/references/hg38_HGSVC/hg38.no_alt.canonical.fa",
-        temp_chroms = temp("/global/scratch/users/stacy-l/references/hg38_HGSVC/canonical_chroms.txt")
+        fasta = config['reference']['fasta'].replace('.fa.gz', '.canonical.fa'),
+        temp_chroms = temp(config['reference']['fasta'].replace('.fa.gz', '.canonical.chroms.txt'))
     threads: 1
     conda:
-        "../envs/mapping.yml"
+        "../envs/environment.yml"
     shell:
         """
         samtools faidx {input}
@@ -324,7 +290,7 @@ rule split_canonical_fasta:
     output:
         expand("output/assembly/hifiasm/{specimen}/hg38_scaffolded/{hap}/repeatmasker/split_fastas/{chr}.fa", allow_missing = True, chr = chrs) # for all chrs
     conda:
-        "../envs/mapping.yml"
+        "../envs/environment.yml"
     params:
         outdir = "output/assembly/hifiasm/{specimen}/hg38_scaffolded/{hap}/repeatmasker/split_fastas"
     shell:
@@ -353,7 +319,7 @@ rule repeatmasker_per_chr:
     log:
         "logs/assembly/hifiasm/{specimen}/hg38_scaffolded/{hap}/repeatmasker/{chr}.log"
     conda:
-        "../envs/RepeatMasker.yml"
+        "../envs/environment.yml"
     params:
         engine = config['repeatmasker']['engine'],
         species = config['repeatmasker']['species'],
@@ -395,7 +361,7 @@ rule combine_repeatmasker_beds:
     wildcard_constraints:
         specimen = "[A-Za-z0-9]+"
     conda:
-        "../envs/mapping.yml"
+        "../envs/environment.yml"
     threads: 1
     shell:
         """

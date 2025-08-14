@@ -1,0 +1,66 @@
+#############################
+### Project configuration ###
+#############################
+
+# Indicate present working directory and metadata (sample) table
+
+workdir: "/global/path/to/hifi_dn_alu/"
+sample_table: "/global/path/to/hifi_dn_alu/config/snakemake/example_samples.tsv" # replace this with your actual sample table
+
+# data is expected in the /global/path/to/hifi_dn_alu/data/ folder relative to the working directory
+# to minimize issues with snakemake's wildcard parsing, use the structure below
+fastq_basepath: "/global/path/to/hifi_dn_alu/data/PacBio-HiFi/{specimen}/{lane}/{smrtcell}.fastq.gz"
+
+##########################
+### Path configuration ###
+##########################
+
+# Specify paths to scripts, packages, and other tools not managed by conda
+# Working on helper functions for managing environmental $PATH as necessary.
+
+paths:
+  kmc:
+    path: "/global/path/to/kmc/bin/kmc"
+
+singularity: # 
+  vg:
+    container: "docker://quay.io/vgteam/vg:v1.63.1"
+    bind_paths: ["/global/path/to/hifi_dn_alu/"]
+    args: "--writable-tmpfs --containall"
+  minigraph-cactus:
+    container: "docker://quay.io/comparative-genomics-toolkit/cactus:v2.8.1"
+    bind_paths: ["/global/path/to/hifi_dn_alu/"]
+    args: "--writable-tmpfs --containall"
+
+###############################
+### Analysis config options ###
+###############################
+
+# Indicate reference genome + annotation files (.bed, .gff, etc)
+# The alias will be used for organizing mapping outputs:
+# for example, output/alignment/CHM13 or output/alignment/hg38_no_alts
+
+# Reference genome and annotations are expected in the default empty ./references directory.
+
+reference:
+  fasta: "/global/path/to/hifi_dn_alu/references/hg38_HGSVC/hg38.no_alt.fa.gz" # HGSVC hg38 no alts
+  refalias: "hg38"
+  annotations:
+    repeats: "/global/path/to/hifi_dn_alu/references/hg38_HGSVC/GRCh38_simpleRepeat.bed" # required for sniffles if calling against hg38
+
+minimap2:
+  readgroup: "@RG\\tID:{specimen}\\tSM:{specimen}\\tPL:PACBIO"
+
+samtools:
+  minQ: 10
+
+sniffles:
+  minsupport: 0
+  mapq: 20
+  mosaic-af-min: 0
+  mosaic-af-max: 0.2
+  mosaic-qc-strand: False
+
+repeatmasker:
+  species: "human"
+  engine: "rmblast"
