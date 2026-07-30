@@ -43,5 +43,5 @@ rule all:
         expand("output/assembly/flagger/{specimen}/prediction_summary_final.tsv", specimen = specimens),
         expand("output/assembly/hifiasm/{specimen}/quast/hg38_scaffolded/report.html", specimen = specimens),
         # hg38 alignment: reference coverage, variant calls through qc_all stage
-        expand(f"output/alignment/{refalias}/minimap2/standard/coverage_stats/{specimen}.coverage.html", specimen = specimens),
-        expand(f'output/alignment/{refalias}/minimap2/standard/variants/sniffles_mosaic/{specimen}.qc_all.vcf.gz', specimen = specimens)
+        expand("output/alignment/{refalias}/minimap2/standard/coverage_stats/{specimen}.coverage.html", refalias = refalias, specimen = specimens),
+        expand('output/alignment/{refalias}/minimap2/standard/variants/sniffles_mosaic/{specimen}.qc_all.vcf.gz', refalias = refalias, specimen = specimens)
