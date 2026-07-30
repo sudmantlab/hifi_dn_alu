@@ -44,6 +44,7 @@ singularity: #
 
 reference:
   fasta: "/global/path/to/hifi_dn_alu/references/hg38_HGSVC/hg38.no_alt.fa.gz" # HGSVC hg38 no alts
+  fasta_uncompressed: "/global/path/to/hifi_dn_alu/references/hg38_HGSVC/hg38.no_alt.fa" # same reference, uncompressed; ragtag scaffold cannot read gzip
   refalias: "hg38"
   annotations:
     repeats: "/global/path/to/hifi_dn_alu/references/hg38_HGSVC/GRCh38_simpleRepeat.bed" # required for sniffles if calling against hg38

@@ -31,9 +31,6 @@ include: "rules/sniffles.smk"
 include: "rules/minigraph-cactus.smk"
 
 ruleorder: minimap2_to_hg38_scaffolded > minimap2
-ruleorder: minimap2_to_T2T_scaffolded > minimap2
-ruleorder: sniffles_mosaic_scaffolded > sniffles_mosaic
-ruleorder: sniffles_standard_scaffolded > sniffles_standard
 ruleorder: sniffles_mosaic_scaffolded > sniffles_mosaic
 ruleorder: sniffles_standard_scaffolded > sniffles_standard
 
@@ -42,6 +39,7 @@ rule all:
         # self-alignment: assembly + QC, variant calls through qc_all stage
         expand("output/assembly/flagger/{specimen}/prediction_summary_final.tsv", specimen = specimens),
         expand("output/assembly/hifiasm/{specimen}/quast/hg38_scaffolded/report.html", specimen = specimens),
-        # hg38 alignment: reference coverage, variant calls through qc_all stage
-        expand("output/alignment/{refalias}/minimap2/standard/coverage_stats/{specimen}.coverage.html", refalias = refalias, specimen = specimens),
-        expand('output/alignment/{refalias}/minimap2/standard/variants/sniffles_mosaic/{specimen}.qc_all.vcf.gz', refalias = refalias, specimen = specimens)
+        # self-alignment: coverage against the scaffolded personal assembly,
+        # variant calls through the qc_all stage
+        expand("output/alignment/{ref}_scaffolded/minimap2/standard/coverage_stats/{specimen}.coverage.html", ref = refalias, specimen = specimens),
+        expand("output/alignment/{ref}_scaffolded/minimap2/standard/variants/sniffles_mosaic/{specimen}.qc_all.vcf.gz", ref = refalias, specimen = specimens)
