@@ -8,7 +8,7 @@ import pandas as pd
 
 configfile: "config/snakemake/config.yml"
 workdir: config['workdir']
-refalias : config['reference']['alias']
+refalias = config['reference']['refalias']
 
 # include common variables and helper functions
 include: "rules/common.smk"
