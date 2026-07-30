@@ -10,12 +10,7 @@ configfile: "config/snakemake/config.yml"
 workdir: config['workdir']
 refalias : config['reference']['alias']
 
-### common variables to be accessed in other rules/helper functions ###
-sample_table = pd.read_table(config['sample_table'], index_col=False, dtype=str)
-specimens = sample_table['specimen'].unique()
-chrs = ['chr' + str(n) for n in np.arange(1, 22).tolist()+['X', 'Y']]
-
-# include helper functions
+# include common variables and helper functions
 include: "rules/common.smk"
 
 # preprocessing steps
